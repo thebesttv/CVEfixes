@@ -12,6 +12,7 @@ import cve_importer
 from utils import prune_tables
 
 from tqdm import tqdm
+import traceback
 
 repo_columns = [
     'repo_url',
@@ -33,15 +34,25 @@ def find_unavailable_urls(urls):
     """
     sleeptime = 0
     unavailable_urls = []
-        response = requests.head(url)
+
+    def requests_head(url):
+        while True:
+            try:
+                return requests.head(url)
+            except Exception as e:
+                cf.logger.error(f"Exception occurred while running requests.head({url})")
+                traceback.print_exc()
+                time.sleep(1)
+                continue
 
     for url in tqdm(urls, "Checking accessibility"):
+        response = requests_head(url)
 
         # wait while sending too many requests (increasing timeout on every iteration)
         while response.status_code == 429:
             sleeptime += 10
             time.sleep(sleeptime)
-            response = requests.head(url)
+            response = requests_head(url)
         sleeptime = 0
 
         # GitLab responds to unavailable repositories by redirecting to their login page.
