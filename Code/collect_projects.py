@@ -11,6 +11,8 @@ from collect_commits import extract_commits, extract_project_links
 import cve_importer
 from utils import prune_tables
 
+from tqdm import tqdm
+
 repo_columns = [
     'repo_url',
     'repo_name',
@@ -31,8 +33,9 @@ def find_unavailable_urls(urls):
     """
     sleeptime = 0
     unavailable_urls = []
-    for url in urls:
         response = requests.head(url)
+
+    for url in tqdm(urls, "Checking accessibility"):
 
         # wait while sending too many requests (increasing timeout on every iteration)
         while response.status_code == 429:
