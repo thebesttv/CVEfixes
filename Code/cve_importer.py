@@ -172,4 +172,8 @@ def import_cves():
         cf.logger.info('All CVEs have been merged into the cve table')
         cf.logger.info('-' * 70)
 
-        assign_cwes_to_cves(df_cve=df_cve)
+        # only preserve these columns
+        df_cve_needed = df_cve[df_cve['problemtype_json'].str.contains(
+            '|'.join(['CWE-476', 'CWE-415', 'CWE-772']))]
+
+        assign_cwes_to_cves(df_cve=df_cve_needed)
